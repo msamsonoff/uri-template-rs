@@ -1,0 +1,11 @@
+digraph {
+    S0 -> S1 [label="PCT"];
+    S0 -> S0 [label="ANY"];
+
+    S1 -> S2 [label="HEX"];
+    S1 -> S1 [label="PCT"];
+    S1 -> S0 [label="ANY"];
+
+    S2 -> S0 [label="HEX,ANY"];
+    S2 -> S1 [label="PCT"];
+}
