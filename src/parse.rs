@@ -1,6 +1,6 @@
 use std::str::Chars;
 
-use crate::encoding::{is_alpha, is_digit, is_hexdig, push_allow_unreserved_reserved};
+use crate::encoding::{is_alpha, is_digit, is_hexdig};
 use crate::item::{Expression, Item, ModifierLevel4, Operator, Varspec};
 
 pub fn parse_template(mut template: &str) -> Vec<Item> {
@@ -45,9 +45,7 @@ pub fn parse_template(mut template: &str) -> Vec<Item> {
 }
 
 fn parse_literal(s: &str) -> Item {
-    let mut dst = String::new();
-    push_allow_unreserved_reserved(&mut dst, s);
-    Item::Literal(dst)
+    Item::Literal(s.to_string())
 }
 
 fn parse_expression(mut s: &str) -> Result<Item, ()> {

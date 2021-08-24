@@ -1,4 +1,6 @@
-use crate::encoding::{push_allow_unreserved, push_allow_unreserved_reserved, PushAllow};
+use crate::encoding::{
+    push_allow_unreserved, push_allow_unreserved_reserved, push_literal, PushAllow,
+};
 use crate::item::{Expression, Item, ModifierLevel4, Operator, Varspec};
 use crate::{Value, Variables};
 
@@ -170,7 +172,7 @@ fn explode_varspec_list(
     } else {
         for v in value {
             push_sep(dst);
-            push_allow_unreserved(dst, &varspec.varname);
+            push_literal(dst, &varspec.varname);
             if v.is_empty() {
                 dst.push_str(operator_table.ifemp);
             } else {
@@ -253,7 +255,7 @@ fn expand_varspec_string(
 
 fn push_name(dst: &mut String, operator_table: &OperatorTable, varspec: &Varspec, empty: bool) {
     if operator_table.named {
-        push_allow_unreserved(dst, &varspec.varname);
+        push_literal(dst, &varspec.varname);
         if empty {
             dst.push_str(operator_table.ifemp);
         } else {

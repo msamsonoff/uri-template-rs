@@ -1,11 +1,16 @@
 pub type PushAllow = fn(&mut String, &str);
 
-pub fn push_allow_unreserved(dst: &mut String, src: &str) {
+pub fn push_literal(dst: &mut String, src: &str) {
     pct_encode(is_unreserved, dst, src);
 }
 
+pub fn push_allow_unreserved(dst: &mut String, src: &str) {
+    src.chars().for_each(|c| push_char(is_unreserved, dst, c));
+}
+
 pub fn push_allow_unreserved_reserved(dst: &mut String, src: &str) {
-    pct_encode(is_unreserved_reserved, dst, src);
+    src.chars()
+        .for_each(|c| push_char(is_unreserved_reserved, dst, c));
 }
 
 pub fn is_alpha(c: char) -> bool {
