@@ -3,6 +3,7 @@ mod expand;
 mod item;
 mod parse;
 
+use std::borrow::Borrow;
 use std::collections::HashMap;
 
 use crate::expand::expand_items;
@@ -19,8 +20,11 @@ pub enum Value {
     String(String),
 }
 
-pub trait Variables {
-    fn get(&self, k: &str) -> Option<&Value>;
+pub trait Variables<'a, B>
+where
+    B: Borrow<Value>,
+{
+    fn get(&'a self, k: &'a str) -> Option<B>;
 }
 
 #[derive(Debug)]
@@ -39,9 +43,10 @@ impl UriTemplate {
         UriTemplate(items)
     }
 
-    pub fn expand<V>(&self, variables: &V) -> String
+    pub fn expand<'a, V, B>(&'a self, variables: &'a V) -> String
     where
-        V: Variables,
+        V: Variables<'a, B>,
+        B: Borrow<Value>,
     {
         expand_items(&self.0, variables)
     }
@@ -126,13 +131,13 @@ impl Value {
     }
 }
 
-impl Variables for Vec<(String, Value)> {
-    fn get(&self, k: &str) -> Option<&Value> {
+impl<'a> Variables<'a, &'a Value> for Vec<(String, Value)> {
+    fn get(&'a self, k: &str) -> Option<&Value> {
         self.iter().find(|(k1, _)| k == k1).map(|(_, v1)| v1)
     }
 }
 
-impl Variables for HashMap<String, Value> {
+impl<'a> Variables<'a, &'a Value> for HashMap<String, Value> {
     fn get(&self, k: &str) -> Option<&Value> {
         self.get(k)
     }

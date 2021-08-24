@@ -1,12 +1,15 @@
+use std::borrow::Borrow;
+
 use crate::encoding::{
     push_allow_unreserved, push_allow_unreserved_reserved, push_literal, PushAllow,
 };
 use crate::item::{Expression, Item, ModifierLevel4, Operator, Varspec};
 use crate::{Value, Variables};
 
-pub fn expand_items<V>(items: &[Item], variables: &V) -> String
+pub fn expand_items<'a, V, B>(items: &'a [Item], variables: &'a V) -> String
 where
-    V: Variables,
+    V: Variables<'a, B>,
+    B: Borrow<Value>,
 {
     let mut dst = String::new();
     for item in items {
@@ -22,18 +25,19 @@ fn expand_literal(dst: &mut String, literal: &str) {
     dst.push_str(literal);
 }
 
-fn expand_expression<V>(variables: &V, dst: &mut String, expression: &Expression)
+fn expand_expression<'a, V, B>(variables: &'a V, dst: &mut String, expression: &'a Expression)
 where
-    V: Variables,
+    V: Variables<'a, B>,
+    B: Borrow<Value>,
 {
     let operator_table = get_operator_table(expression.operator);
     let mut push_sep = make_push_sep(operator_table.first, operator_table.sep);
     for varspec in &expression.variable_list {
         if let Some(value) = variables.get(&varspec.varname) {
             if let Some(ModifierLevel4::Explode) = varspec.modifier_level4 {
-                explode_varspec(dst, &operator_table, &mut push_sep, varspec, value);
+                explode_varspec(dst, &operator_table, &mut push_sep, varspec, value.borrow());
             } else {
-                expand_varspec(dst, &operator_table, &mut push_sep, varspec, value);
+                expand_varspec(dst, &operator_table, &mut push_sep, varspec, value.borrow());
             }
         }
     }
