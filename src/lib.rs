@@ -449,7 +449,7 @@ mod tests {
         let uri_template = UriTemplate::parse("x{/y*}");
 
         let left = uri_template.expander().set_string("y", "ABC").expand();
-        assert_eq!(left, "x");
+        assert_eq!(left, "x/ABC");
 
         let left = uri_template.expander().expand();
         assert_eq!(left, "x");
@@ -484,12 +484,13 @@ mod tests {
         let uri_template = UriTemplate::parse("x{;y*}");
 
         let left = uri_template.expander().set_string("y", "ABC").expand();
-        assert_eq!(left, "x");
+        assert_eq!(left, "x;y=ABC");
 
         let left = uri_template.expander().expand();
         assert_eq!(left, "x");
 
-        let left = uri_template.expander()
+        let left = uri_template
+            .expander()
             .set_list("y", ["A", "", "B"])
             .expand();
         assert_eq!(left, "x;y=A;y;y=B");

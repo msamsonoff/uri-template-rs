@@ -126,15 +126,22 @@ fn explode_varspec<F>(
     F: FnMut(&mut String),
 {
     match value {
-        Value::AssociativeArray(value) if !value.is_empty() => {
-            push_sep(dst);
-            explode_varspec_assoc(dst, operator_table, value);
+        Value::AssociativeArray(value) => {
+            if !value.is_empty() {
+                push_sep(dst);
+                explode_varspec_assoc(dst, operator_table, value);
+            }
         }
-        Value::List(value) if !value.is_empty() => {
-            push_sep(dst);
-            explode_varspec_list(dst, operator_table, varspec, value);
+        Value::List(value) => {
+            if !value.is_empty() {
+                push_sep(dst);
+                explode_varspec_list(dst, operator_table, varspec, value);
+            }
         }
-        _ => {}
+        Value::String(value) => {
+            push_sep(dst);
+            explode_varspec_string(dst, operator_table, varspec, value);
+        }
     }
 }
 
@@ -179,6 +186,25 @@ fn explode_varspec_list(
                 dst.push('=');
                 (operator_table.allow)(dst, v);
             }
+        }
+    }
+}
+
+fn explode_varspec_string(
+    dst: &mut String,
+    operator_table: &OperatorTable,
+    varspec: &Varspec,
+    value: &str,
+) {
+    if !operator_table.named {
+        (operator_table.allow)(dst, value);
+    } else {
+        push_literal(dst, &varspec.varname);
+        if value.is_empty() {
+            dst.push_str(operator_table.ifemp);
+        } else {
+            dst.push('=');
+            (operator_table.allow)(dst, value);
         }
     }
 }
